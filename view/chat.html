@@ -7,12 +7,20 @@
 </head>
 <body>
   <div class="container">
-    <div class="card flex" style="justify-content: space-between;">
-      <div>
-        <h2 style="margin:0;">Chat App</h2>
+    <div class="card header">
+      <div class="brand">
+        <h2>Chat App</h2>
         <div class="small">Logged in as <span class="badge" id="me"></span></div>
+        <div class="kpi">
+          <div class="pill">Rooms + Private Chat</div>
+          <div class="pill">MongoDB + Socket.IO</div>
+        </div>
       </div>
-      <button class="secondary" id="logoutBtn">Logout</button>
+
+      <div class="toolbar">
+        <button class="chip" id="themeBtn"> Dark</button>
+        <button class="btn secondary" id="logoutBtn">Logout</button>
+      </div>
     </div>
 
     <div class="row">
@@ -20,8 +28,8 @@
         <h3>Rooms</h3>
         <select id="roomSelect"></select>
         <div class="flex" style="margin-top:10px;">
-          <button id="joinBtn">Join</button>
-          <button class="secondary" id="leaveBtn">Leave</button>
+          <button class="btn" id="joinBtn">Join</button>
+          <button class="btn secondary" id="leaveBtn">Leave</button>
         </div>
         <p class="small" id="roomStatus">Not in a room</p>
 
@@ -34,7 +42,7 @@
         <div id="roomMessages" class="messages"></div>
         <div class="flex" style="margin-top:10px;">
           <input id="roomInput" placeholder="Type a room message..." />
-          <button id="sendRoomBtn" style="max-width:160px;">Send</button>
+          <button class="btn" id="sendRoomBtn" style="max-width:160px;">Send</button>
         </div>
       </div>
     </div>
@@ -43,14 +51,14 @@
       <h3>Private Chat (1-to-1)</h3>
       <div class="flex">
         <select id="privateTo"></select>
-        <span class="small" id="typingStatus"></span>
+        <span class="typing" id="typingStatus"></span>
       </div>
 
       <div id="privateMessages" class="messages" style="margin-top:10px;"></div>
 
       <div class="flex" style="margin-top:10px;">
         <input id="privateInput" placeholder="Type a private message..." />
-        <button id="sendPrivateBtn" style="max-width:160px;">Send</button>
+        <button class="btn accent" id="sendPrivateBtn" style="max-width:160px;">Send</button>
       </div>
     </div>
   </div>

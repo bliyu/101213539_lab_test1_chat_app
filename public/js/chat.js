@@ -7,6 +7,20 @@ if (!token || !username) {
 
 document.getElementById("me").textContent = username;
 
+// --- Theme (Dark Mode) ---
+const themeBtn = document.getElementById("themeBtn");
+function setTheme(mode) {
+  if (mode === "dark") document.body.classList.add("dark");
+  else document.body.classList.remove("dark");
+  localStorage.setItem("theme", mode);
+  themeBtn.textContent = mode === "dark" ? " Light" : " Dark";
+}
+setTheme(localStorage.getItem("theme") || "light");
+themeBtn.addEventListener("click", () => {
+  const next = document.body.classList.contains("dark") ? "light" : "dark";
+  setTheme(next);
+});
+
 const socket = io();
 socket.emit("auth", { token });
 
@@ -26,8 +40,8 @@ let typingTimeout = null;
 async function loadUsers() {
   const res = await fetch("/api/users");
   const users = await res.json();
-  privateTo.innerHTML = "";
 
+  privateTo.innerHTML = "";
   users
     .filter(u => u !== username)
     .forEach(u => {
@@ -46,20 +60,23 @@ async function loadUsers() {
 }
 loadUsers();
 
-function addMsg(container, meta, text) {
-  const wrap = document.createElement("div");
-  wrap.className = "msg";
-  wrap.innerHTML = `<div class="meta">${meta}</div><div>${escapeHtml(text)}</div>`;
-  container.appendChild(wrap);
-  container.scrollTop = container.scrollHeight;
-}
-
 function escapeHtml(s) {
   return String(s).replace(/[&<>"']/g, (c) => ({
     "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"
   }[c]));
 }
 
+function addBubble(container, meta, text, isMe = false) {
+  const wrap = document.createElement("div");
+  wrap.className = "msg" + (isMe ? " me" : "");
+  wrap.innerHTML =
+    `<div class="meta">${escapeHtml(meta)}</div>` +
+    `<div class="bubble">${escapeHtml(text)}</div>`;
+  container.appendChild(wrap);
+  container.scrollTop = container.scrollHeight;
+}
+
+// --- Socket events ---
 socket.on("authError", ({ message }) => {
   alert(message);
   localStorage.removeItem("token");
@@ -82,35 +99,44 @@ socket.on("onlineUsers", (users) => {
 });
 
 socket.on("system", ({ text }) => {
-  if (currentRoom) addMsg(roomMessages, "[system]", text);
+  if (currentRoom) addBubble(roomMessages, "system", text, false);
 });
 
 socket.on("roomHistory", (msgs) => {
   roomMessages.innerHTML = "";
   msgs.forEach(m => {
     const time = new Date(m.createdAt).toLocaleString();
-    addMsg(roomMessages, `${m.from}  ${time}`, m.text);
+    const isMe = m.from === username;
+    addBubble(roomMessages, `${m.from}  ${time}`, m.text, isMe);
   });
 });
 
 socket.on("roomMessage", (m) => {
   if (m.room !== currentRoom) return;
   const time = new Date(m.createdAt).toLocaleString();
-  addMsg(roomMessages, `${m.from}  ${time}`, m.text);
+  const isMe = m.from === username;
+  addBubble(roomMessages, `${m.from}  ${time}`, m.text, isMe);
 });
 
 socket.on("privateMessage", (m) => {
   const time = new Date(m.createdAt).toLocaleString();
-  const label = (m.from === username) ? `Me -> ${m.to}` : `${m.from} -> Me`;
-  addMsg(privateMessages, `${label}  ${time}`, m.text);
+  const isMe = m.from === username;
+  const label = isMe ? `Me  ${m.to}` : `${m.from}  Me`;
+  addBubble(privateMessages, `${label}  ${time}`, m.text, isMe);
 });
 
 socket.on("typing", ({ from, isTyping }) => {
   const toUser = privateTo.value;
   if (from !== toUser) return;
-  typingStatus.textContent = isTyping ? `${from} is typing...` : "";
+
+  if (isTyping) {
+    typingStatus.innerHTML = `${escapeHtml(from)} is typing <span class="dots"><span></span><span></span><span></span></span>`;
+  } else {
+    typingStatus.textContent = "";
+  }
 });
 
+// --- UI actions ---
 document.getElementById("joinBtn").addEventListener("click", () => {
   const room = roomSelect.value;
   if (!room) return;
@@ -140,6 +166,7 @@ document.getElementById("sendPrivateBtn").addEventListener("click", () => {
   if (!to) return;
   const text = privateInput.value.trim();
   if (!text) return;
+
   socket.emit("privateMessage", { to, text });
   privateInput.value = "";
   socket.emit("typing", { to, isTyping: false });
@@ -155,7 +182,8 @@ privateInput.addEventListener("input", () => {
   clearTimeout(typingTimeout);
   typingTimeout = setTimeout(() => {
     socket.emit("typing", { to, isTyping: false });
-  }, 600);
+    typingStatus.textContent = "";
+  }, 700);
 });
 
 document.getElementById("logoutBtn").addEventListener("click", () => {
