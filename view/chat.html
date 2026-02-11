@@ -1,0 +1,61 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <title>Chat</title>
+  <link rel="stylesheet" href="/css/style.css" />
+</head>
+<body>
+  <div class="container">
+    <div class="card flex" style="justify-content: space-between;">
+      <div>
+        <h2 style="margin:0;">Chat App</h2>
+        <div class="small">Logged in as <span class="badge" id="me"></span></div>
+      </div>
+      <button class="secondary" id="logoutBtn">Logout</button>
+    </div>
+
+    <div class="row">
+      <div class="card">
+        <h3>Rooms</h3>
+        <select id="roomSelect"></select>
+        <div class="flex" style="margin-top:10px;">
+          <button id="joinBtn">Join</button>
+          <button class="secondary" id="leaveBtn">Leave</button>
+        </div>
+        <p class="small" id="roomStatus">Not in a room</p>
+
+        <h3>Online Users</h3>
+        <div id="onlineUsers" class="small">--</div>
+      </div>
+
+      <div class="card">
+        <h3>Room Chat</h3>
+        <div id="roomMessages" class="messages"></div>
+        <div class="flex" style="margin-top:10px;">
+          <input id="roomInput" placeholder="Type a room message..." />
+          <button id="sendRoomBtn" style="max-width:160px;">Send</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>Private Chat (1-to-1)</h3>
+      <div class="flex">
+        <select id="privateTo"></select>
+        <span class="small" id="typingStatus"></span>
+      </div>
+
+      <div id="privateMessages" class="messages" style="margin-top:10px;"></div>
+
+      <div class="flex" style="margin-top:10px;">
+        <input id="privateInput" placeholder="Type a private message..." />
+        <button id="sendPrivateBtn" style="max-width:160px;">Send</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="/js/chat.js"></script>
+</body>
+</html>
